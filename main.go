@@ -57,5 +57,58 @@ func main() {
 		aliens[i] = cityNames[rand.Intn(len(cities))]
 		fmt.Println("Alien", i, "is in", aliens[i], "city")
 	}
+	fmt.Println("Starting invasion..")
+	numberOfDeadAlien := 0
+	numberOfIterations := 1
+	for numberOfIterations <= 10000 {
+		fmt.Println("Day", numberOfIterations, "of invasion")
+		for i := 1; i <= numberOfAliens; i++ {
+			if aliens[i] != "DEAD" {
+				aliensCurrentCity := aliens[i]
+				possibleDestinations, exists := cities[aliensCurrentCity]
+				// If there's no entry for the city in the map or if there's no possible destination out of the city, then alien is considered contained
+				if !exists || len(possibleDestinations) == 0 {
+					fmt.Println("Alien", i, "has died in", aliensCurrentCity)
+					numberOfDeadAlien++
+					aliens[i] = "DEAD"
+				} else {
+					rand.Seed(time.Now().UnixNano())
+					// Choose a random destination index from the alien's current city.
+					destinationIndex := rand.Intn(len(possibleDestinations))
+					newDestination := cities[aliensCurrentCity][destinationIndex]
+					// Move alien to new city
+					aliens[i] = newDestination
+					fmt.Println("Alien number", i, "moved from", aliensCurrentCity, "to", aliens[i])
+					// Now check if there's an alien in that city
+					for k, v := range aliens {
+						if strings.EqualFold(v, newDestination) && k != i {
+							fmt.Println("Alien fight! Alien ", k, "is fighting with alien", i, "in", newDestination, "city... The fight ends with the city destroyed and all aliens in this city are now dead.")
+							// Kill both aliens
+							aliens[i] = "DEAD"
+							aliens[k] = "DEAD"
+							numberOfDeadAlien = numberOfDeadAlien + 2
+							// Detroy city - no way out
+							cities[newDestination] = []string{}
+							// Remove city as potential destination from other cities
+							for city, paths := range cities {
+								for index, path := range paths {
+									if path == newDestination {
+										cities[city][index] = cities[city][len(cities[city])-1]
+										cities[city] = cities[city][:len(cities[city])-1]
+									}
+								}
+							}
+							break
 
+						}
+					}
+				}
+			}
+			if numberOfDeadAlien == numberOfAliens {
+				fmt.Println("Congrats! All the aliens are either dead or contained! It's a victory for humanity!")
+				os.Exit(0)
+			}
+		}
+		numberOfIterations++
+	}
 }
