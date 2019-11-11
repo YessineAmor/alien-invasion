@@ -105,7 +105,18 @@ func main() {
 				}
 			}
 			if numberOfDeadAlien == numberOfAliens {
-				fmt.Println("Congrats! All the aliens are either dead or contained! It's a victory for humanity!")
+				fmt.Println("Congrats! All the aliens are either dead or contained! It's a victory for humanity!... I think")
+				// Print whats left of the world
+				fmt.Println("Remaining cities and paths are:")
+				for city, paths := range cities {
+					if len(paths) > 0 {
+						fmt.Print("from ", city, " you can go to ")
+						for _, path := range paths {
+							fmt.Print(path, " ")
+						}
+						fmt.Println()
+					}
+				}
 				os.Exit(0)
 			}
 		}
